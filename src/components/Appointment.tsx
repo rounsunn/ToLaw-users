@@ -6,7 +6,7 @@ import appointment4 from "../assets/appointment4.png"
 
 const Appointment = () => {
   return (
-    <div className="my-5">
+    <div className="flex flex-col gap-2 my-5">
         <h2 className="text-black text-4xl max-sm:text-base font-medium">Steps to book an appointment</h2>
         <div className="opacity-50 text-black text-lg max-sm:text-[10px] font-normal mb-2">4 Simple steps to book an appointment with the lawyer.</div>
         <div className="grid grid-cols-4 max-sm:grid-cols-2 gap-3">

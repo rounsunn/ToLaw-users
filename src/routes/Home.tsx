@@ -6,7 +6,7 @@ import { AiContent, NotarizeContent, freeConsultationContent, lawyerConsultation
 
 export const Home = () => {
   return (
-    <div className="px-20 max-md:px-5 my-10 font-poppins">
+    <div className="px-28 max-md:px-5 my-10 font-poppins">
 
       {/* banner */}
       <HomeBanner />
