@@ -33,7 +33,7 @@ function SearchBar({ onSearch }: { onSearch: (term: string) => void }) {
       </Button>
     </div>
   );
-}
+} 
 
 const SearchPage = () => {
   const [search, setsearch] = useState("*");

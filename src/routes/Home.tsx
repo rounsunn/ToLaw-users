@@ -1,6 +1,7 @@
 import Appointment from "../components/Appointment";
 import HomeBanner from "../components/HomeBanner";
 import HomeBar from "../components/HomeBar";
+import Lawcategories from "../components/Lawcategories";
 import LawyersCarasouel from "../components/LawyersCarasouel";
 import SecondBanner from "../components/SecondBanner";
 import { AiContent, NotarizeContent, freeConsultationContent, lawyerConsultationContent } from "../content";
@@ -14,6 +15,9 @@ export const Home = () => {
 
       {/* banner */}
       <HomeBanner />
+
+      {/* law categories */}
+      <Lawcategories />
 
       {/* free consultaion */}
       <LawyersCarasouel {...freeConsultationContent}/>
