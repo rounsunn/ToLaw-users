@@ -1,15 +1,23 @@
 import Appointment from "../components/Appointment";
 import HomeBanner from "../components/HomeBanner";
+import HomeBar from "../components/HomeBar";
+import Lawcategories from "../components/Lawcategories";
 import LawyersCarasouel from "../components/LawyersCarasouel";
 import SecondBanner from "../components/SecondBanner";
 import { AiContent, NotarizeContent, freeConsultationContent, lawyerConsultationContent } from "../content";
+import { useMediaQuery } from "react-responsive";
 
 export const Home = () => {
+  const isMobile = useMediaQuery({ maxWidth: 550 });
+
   return (
-    <div className="px-20 max-md:px-5 my-10 font-poppins">
+    <div className="px-28 max-md:px-5 my-10 font-poppins">
 
       {/* banner */}
       <HomeBanner />
+
+      {/* law categories */}
+      <Lawcategories />
 
       {/* free consultaion */}
       <LawyersCarasouel {...freeConsultationContent}/>
@@ -26,6 +34,9 @@ export const Home = () => {
       {/* notarize */}
       <SecondBanner {...NotarizeContent}/>
 
+      {/* bottombar for small devices */}
+      {isMobile && <HomeBar />}
+      
     </div>
   );
 };
