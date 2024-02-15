@@ -3,11 +3,14 @@ import useClipboard from "react-use-clipboard";
 import SpeechRecognition, { useSpeechRecognition} from "react-speech-recognition";
 import { useEffect, useState, useRef } from "react";
 import OpenAI from "openai";
+import Speech from 'react-speech';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 
 import { PiMicrophoneLight } from "react-icons/pi";
 import { FaMicrophone, FaArrowCircleDown } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
+import { RiUserVoiceFill } from "react-icons/ri";
+import { MdRecordVoiceOver, MdOutlineVoiceOverOff } from "react-icons/md";
 
 
 const voiceProps = {
@@ -33,10 +36,9 @@ interface ChatElement {
 
 const AiAssist = () => {
   const [listen, setListen] = useState(false);
-  const [response, setResponse] = useState("");
   const [chatLog, setChatLog] = useState<ChatElement[]>([]);
   const [userInput, setUserInput] = useState('');
-  const [isAnswering, setIsAnswering] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const [downButtonPressed, setDownButtonPressed] = useState(false)
   const chatLogRef = useRef<HTMLDivElement>(null);
@@ -111,7 +113,6 @@ const AiAssist = () => {
 
   const aiResponse = async (input: string) => {
     try {
-      setIsAnswering(true);
       let botMessage = '';
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -172,65 +173,115 @@ const AiAssist = () => {
       resetTranscript();
       setUserInput('');
       setDownButtonPressed(false);
-      setIsAnswering(false);
     }
   };
 
+  const handleTextToSpeech = (botMessage: string) => {
+    // Get the list of available voices
+    const voices = window.speechSynthesis.getVoices();
+  
+    const isHindi = /[।॥ःअ-ऋए-ऑओ-नप-रलळव-ह]/.test(botMessage);
+  
+    // Find the desired voice by name
+    let desiredVoice;
+    if(isHindi){
+      desiredVoice = voices.find(voice => voice.name === "Google हिन्दी");
+    } else {
+      desiredVoice = voices.find(voice => voice.name === "Microsoft Heera - English (India)");
+    }
+  
+    // Check if desiredVoice is undefined
+    if (desiredVoice === undefined) {
+      console.error("Desired voice not found.");
+      return;
+    }
+  
+    // Speak the text with the desired voice
+    const value = new SpeechSynthesisUtterance(botMessage);
+    value.voice = desiredVoice;
+  
+    // Set speaking state to true when speech starts
+    setSpeaking(true);
+  
+    // Set speaking state to false when speech ends
+    value.onend = () => {
+      setSpeaking(false);
+    };
+  
+    window.speechSynthesis.speak(value);
+  };
+  
+
+  // Function to stop speech synthesis
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setSpeaking(false);
+  };
+
+
+
 
   return (
-    <div className="px-28 max-md:px-5 my-10 font-poppins">
+    <div className="mt-10 font-poppins">
       {/* heading big, sticky fixed like header */}
-      <h1 className="text-5xl flex justify-center py-3 top-[100px] left-0 right-0 z-10">Talk to Lexi</h1>
+      <h1 className="text-5xl flex justify-center py-3">Talk to Lexi</h1>
 
       {/* chatbox container + fix height */}
-      <div className="h-[600px] flex flex-col items-end justify-center bg-slate-200 rounded-3xl p-4">
-        {/* chatbox */}
-        <div className="h-[550px] w-full overflow-auto p-4 mb-4" ref={chatLogRef}>
-          {/* chat log */}
-          {chatLog.length>0 ? (
-            <div className='flex flex-col space-y-4'>
-                {chatLog.map((messageElement, index) => (
-                    <div key={index} className={`flex ${
-                        messageElement.type === 'user' ? 'justify-start' : 'justify-end'
-                    }`}>
-                        <div className={`${
-                            messageElement.type === 'user' ? 'bg-white text-black' : 'bg-[#0C253F] text-white'
-                        } rounded-lg p-4 max-w-sm`}>
-                        {messageElement.message}
-                        </div>
-                    </div>
-                ))}
-            </div>
-          ) : ( 
-            <div className="flex flex-col space-y-8">
-                <h2 className="text-2xl">
-                  Hello, I am Lexi, your professional legal adviser trained on Indian law data.
-                </h2>
-                <p>
-                  Have a legal question? I'm here to help! Whether it's related to family law, contracts, property disputes, or any other legal matter, feel free to ask.
-                </p>
-                <p>
-                  I'm powered by advanced AI technology and have been trained on a vast database of Indian legal information to provide accurate and reliable answers to your queries.
-                </p>
-                <p>
-                  Simply type your question in the chatbox below, or click on the microphone icon to speak to me. I'll do my best to assist you.
-                </p>
+      <div className="px-28 max-md:px-5">
+        <div className="flex flex-col items-end justify-center bg-slate-200 rounded-3xl p-4">
+          {/* chatbox */}
+          <div className="w-full overflow-auto p-4 mb-4" ref={chatLogRef}>
+            {/* chat log */}
+            {chatLog.length>0 ? (
+              <div className='flex flex-col space-y-4 w-full'>
+                  {chatLog.map((messageElement, index) => (
+                      <div key={index} className={`flex ${
+                          messageElement.type === 'user' ? 'justify-start' : 'justify-end w-full'
+                      }`}>
+                          <div className={`${
+                              messageElement.type === 'user' ? 'bg-white text-black' : 'bg-[#0C253F] text-white flex items-center gap-2'
+                          } rounded-lg p-4 max-w-[80%]`}>
+                          {messageElement.type === 'bot' && !speaking &&<button type="button" onClick={() => handleTextToSpeech(messageElement.message)}><MdRecordVoiceOver className="w-5 h-5" /></button>}
+                          {messageElement.type === 'bot' && speaking &&<button type="button" onClick={stopSpeaking}><MdOutlineVoiceOverOff className="w-5 h-5" /></button>}
+                          {messageElement.message}
+                          </div>
+                      </div>
+                  ))}
+              </div>
+            ) : ( 
+              <div className="flex flex-col space-y-8">
+                  <h2 className="text-2xl">
+                    Hello, I am Lexi, your professional legal adviser trained on Indian law data.
+                  </h2>
+                  <p>
+                    Have a legal question? I'm here to help! Whether it's related to family law, contracts, property disputes, or any other legal matter, feel free to ask.
+                  </p>
+                  <p>
+                    I'm powered by advanced AI technology and have been trained on a vast database of Indian legal information to provide accurate and reliable answers to your queries.
+                  </p>
+                  <p>
+                    Simply type your question in the chatbox below, or click on the microphone icon to speak to me. I'll do my best to assist you.
+                  </p>
+              </div>
+            )}
+
+          </div>
+
+          {/* Downward arrow icon button */}
+          {chatLog.length > 4 && !downButtonPressed && (
+            <div className="flex justify-center w-full mb-2">
+              <button onClick={scrollToBottom} title="Scroll to bottom">
+                <FaArrowCircleDown className="text-[#0C253F] text-3xl" />
+              </button>
             </div>
           )}
 
         </div>
+      </div>
 
-        {/* Downward arrow icon button */}
-        {chatLog.length > 4 && !downButtonPressed && (
-          <div className="flex justify-center w-full mb-2">
-            <button onClick={scrollToBottom} title="Scroll to bottom">
-              <FaArrowCircleDown className="text-[#0C253F] text-3xl" />
-            </button>
-          </div>
-        )}
-
-        {/* input */}
-        <div className="bg-white w-full rounded-2xl flex justify-between items-center">
+      {/* input */}
+      <div className="w-screen flex justify-center fixed bottom-5 z-100">
+        <div className="bg-white w-3/4 rounded-2xl flex items-center justify-between items-center border border-px border-black">
         <TextareaAutosize
           minRows={1}
           maxRows={4}
