@@ -38,6 +38,7 @@ const AiAssist = () => {
   const [listen, setListen] = useState(false);
   const [chatLog, setChatLog] = useState<ChatElement[]>([]);
   const [userInput, setUserInput] = useState('');
+  const [speechInput, setSpeechInput] = useState('');
   const [speaking, setSpeaking] = useState(false);
 
   const [downButtonPressed, setDownButtonPressed] = useState(false)
@@ -64,7 +65,7 @@ const AiAssist = () => {
 
   useEffect(() => {
     if (listen) {
-      setUserInput(transcript);
+      setSpeechInput(transcript);
     }
   }, [transcript, listen]);
 
@@ -79,8 +80,10 @@ const AiAssist = () => {
   }
 
   const handleSendButton = () => {
-    setChatLog((prevChatLog) => [...prevChatLog, {type:"user", message:userInput}]);
-    aiResponse(userInput);
+    if(userInput){
+      setChatLog((prevChatLog) => [...prevChatLog, {type:"user", message:userInput}]);
+      aiResponse(userInput);
+    }
   }
 
   const handleListening =() => {
@@ -91,8 +94,8 @@ const AiAssist = () => {
   const handleStopListening =() => {
     SpeechRecognition.stopListening;
     if(transcript){
-      setChatLog((prevChatLog) => [...prevChatLog, {type:"user", message:userInput}]);
-      aiResponse(userInput);
+      setChatLog((prevChatLog) => [...prevChatLog, {type:"user", message:speechInput}]);
+      aiResponse(speechInput);
     }
     setListen(false);
   }
@@ -177,39 +180,35 @@ const AiAssist = () => {
   };
 
   const handleTextToSpeech = (botMessage: string) => {
-    // Get the list of available voices
-    const voices = window.speechSynthesis.getVoices();
+    let voices = window.speechSynthesis.getVoices();
   
-    const isHindi = /[।॥ःअ-ऋए-ऑओ-नप-रलळव-ह]/.test(botMessage);
+    const speakMessage = () => {
+      const isHindi = /[।॥ःअ-ऋए-ऑओ-नप-रलळव-ह]/.test(botMessage);
+      let desiredVoice = voices.find(voice => isHindi ? voice.name === "Google हिन्दी" : voice.name === "Microsoft Heera - English (India)");
   
-    // Find the desired voice by name
-    let desiredVoice;
-    if(isHindi){
-      desiredVoice = voices.find(voice => voice.name === "Google हिन्दी");
-    } else {
-      desiredVoice = voices.find(voice => voice.name === "Microsoft Heera - English (India)");
-    }
+      if (desiredVoice) {
+        const utterance = new SpeechSynthesisUtterance(botMessage);
+        utterance.voice = desiredVoice;
   
-    // Check if desiredVoice is undefined
-    if (desiredVoice === undefined) {
-      console.error("Desired voice not found.");
-      return;
-    }
+        setSpeaking(true);
+        utterance.onend = () => setSpeaking(false);
   
-    // Speak the text with the desired voice
-    const value = new SpeechSynthesisUtterance(botMessage);
-    value.voice = desiredVoice;
-  
-    // Set speaking state to true when speech starts
-    setSpeaking(true);
-  
-    // Set speaking state to false when speech ends
-    value.onend = () => {
-      setSpeaking(false);
+        window.speechSynthesis.speak(utterance);
+      } else {
+        console.error("Desired voice not found.");
+      }
     };
   
-    window.speechSynthesis.speak(value);
+    if (voices.length > 0) {
+      speakMessage();
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => {
+        voices = window.speechSynthesis.getVoices();
+        speakMessage();
+      };
+    }
   };
+  
   
 
   // Function to stop speech synthesis
@@ -224,7 +223,7 @@ const AiAssist = () => {
   return (
     <div className="mt-10 font-poppins">
       {/* heading big, sticky fixed like header */}
-      <h1 className="text-5xl flex justify-center py-3">Talk to Lexi</h1>
+      <h1 className="text-5xl flex justify-center pb-3">Talk to Lexi</h1>
 
       {/* chatbox container + fix height */}
       <div className="px-28 max-md:px-5">
@@ -249,19 +248,23 @@ const AiAssist = () => {
                   ))}
               </div>
             ) : ( 
-              <div className="flex flex-col space-y-8">
-                  <h2 className="text-2xl">
+              <div className="flex flex-col space-y-2">
+                  <h2 className="text-2xl max-md:text-xl">
                     Hello, I am Lexi, your professional legal adviser trained on Indian law data.
                   </h2>
-                  <p>
+                  <p className="text-normal max-md:text-sm">
                     Have a legal question? I'm here to help! Whether it's related to family law, contracts, property disputes, or any other legal matter, feel free to ask.
                   </p>
-                  <p>
+                  <p className="text-normal max-md:text-sm">
                     I'm powered by advanced AI technology and have been trained on a vast database of Indian legal information to provide accurate and reliable answers to your queries.
                   </p>
-                  <p>
+                  <p className="text-normal max-md:text-sm">
                     Simply type your question in the chatbox below, or click on the microphone icon to speak to me. I'll do my best to assist you.
                   </p>
+                  <p className="text-normal max-md:text-sm">
+                    You can also listen to my responses in either <span className="font-bold">English or Hindi</span>. If you prefer to hear the answers, look for the voice icon next to my responses and click it.
+                  </p>
+
               </div>
             )}
 
@@ -282,32 +285,38 @@ const AiAssist = () => {
       {/* input */}
       <div className="w-screen flex justify-center fixed bottom-5 z-100">
         <div className="bg-white w-3/4 rounded-2xl flex items-center justify-between items-center border border-px border-black">
-        <TextareaAutosize
-          minRows={1}
-          maxRows={4}
-          className="w-full rounded-2xl focus:outline-none px-2 pt-3"
-          style={{ display: 'flex', alignItems: 'center' }}
-          placeholder="Type here..."
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSendButton();
-            }
-          }}
-        />
-
-        <div className='flex gap-4 p-2 text-xl'>
-          {/* send button */}
-          <button onClick={handleSendButton}><IoIosSend /></button>
-          
-          {/* microphone */}
           {listen ? (
-            <button onClick={handleStopListening} title="Listening"><FaMicrophone /></button>
-          ) : (
-            <button onClick={handleListening} title="start recording"><PiMicrophoneLight /></button>
+            <div className="w-full rounded-2xl focus:outline-none px-2 py-3">
+              {speechInput ? <p>{speechInput}</p> : <p className="opacity-50">start speaking</p>}
+            </div>
+          ): (
+            <TextareaAutosize
+              minRows={1}
+              maxRows={4}
+              className="w-full rounded-2xl focus:outline-none px-2 pt-3"
+              style={{ display: 'flex', alignItems: 'center' }}
+              placeholder="Type here..."
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendButton();
+                }
+              }}
+            />
           )}
-        </div>
+
+          <div className='flex gap-4 p-2 text-xl'>
+            {/* send button */}
+            <button onClick={handleSendButton}><IoIosSend /></button>
+            
+            {/* microphone */}
+            {listen ? (
+              <button onClick={handleStopListening} title="Listening"><FaMicrophone /></button>
+            ) : (
+              <button onClick={handleListening} title="start recording"><PiMicrophoneLight /></button>
+            )}
+          </div>
         </div>
       </div>
 
