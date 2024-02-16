@@ -9,7 +9,7 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 import { PiMicrophoneLight } from "react-icons/pi";
 import { FaMicrophone, FaArrowCircleDown } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
-import { RiUserVoiceFill } from "react-icons/ri";
+import { FaUndo } from "react-icons/fa";
 import { MdRecordVoiceOver, MdOutlineVoiceOverOff } from "react-icons/md";
 
 
@@ -308,7 +308,16 @@ const AiAssist = () => {
 
           <div className='flex gap-4 p-2 text-xl'>
             {/* send button */}
-            <button onClick={handleSendButton}><IoIosSend /></button>
+            {listen ? (
+              <button onClick={() => {
+                setSpeechInput('');
+                resetTranscript();
+              }}>
+                <FaUndo />
+              </button>
+            ) : (
+              <button onClick={handleSendButton}><IoIosSend /></button>
+            )}
             
             {/* microphone */}
             {listen ? (
