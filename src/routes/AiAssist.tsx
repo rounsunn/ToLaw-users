@@ -88,10 +88,15 @@ const AiAssist = () => {
       ]);
       aiResponse(userInput);
     }
+    if (listen) {
+      SpeechRecognition.stopListening();
+      setListen(false);
+    }
   };
 
   const handleListening = () => {
     setListen(true);
+    resetTranscript();
     startListening();
   };
 
@@ -104,6 +109,8 @@ const AiAssist = () => {
       ]);
       aiResponse(speechInput);
     }
+    
+    resetTranscript();
     setListen(false);
   };
 
@@ -137,7 +144,7 @@ const AiAssist = () => {
               {
                 role: "system",
                 content:
-                  "You are professional legal helper having experience of 10 yeras in legal side, answer query symphetically",
+                  "You are a professional legal helper having experience of 10 years in legal side, now answer the next query as a lawyer sympathetically",
               },
               { role: "user", content: input },
             ],
@@ -209,6 +216,10 @@ const AiAssist = () => {
           : voice.name === "Microsoft Heera - English (India)"
       );
 
+      if (!desiredVoice) {
+        desiredVoice = voices.find((voice) => voice.default);
+      }
+
       if (desiredVoice) {
         const utterance = new SpeechSynthesisUtterance(botMessage);
         utterance.voice = desiredVoice;
@@ -239,7 +250,7 @@ const AiAssist = () => {
   };
 
   return (
-    <div className="mt-10 font-poppins">
+    <div className="mt-10 font-poppins h-[500px] overflow-y-auto overflow-x-hidden">
       {/* heading big, sticky fixed like header */}
       <h1 className="text-5xl flex justify-center pb-3">Talk to Lexi</h1>
 
@@ -319,18 +330,18 @@ const AiAssist = () => {
           </div>
 
           {/* Downward arrow icon button */}
-          {chatLog.length > 4 && !downButtonPressed && (
+          {/* {chatLog.length > 4 && !downButtonPressed && (
             <div className="flex justify-center w-full mb-2">
               <button onClick={scrollToBottom} title="Scroll to bottom">
                 <FaArrowCircleDown className="text-[#0C253F] text-3xl" />
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
       {/* input */}
-      <div className="w-screen flex justify-center fixed bottom-5 z-100">
+      <div className="w-screen flex justify-center relative fixed bottom-5 z-100">
         <div className="bg-white w-3/4 rounded-2xl flex items-center justify-between items-center border border-px border-black">
           {listen ? (
             <div className="w-full rounded-2xl focus:outline-none px-2 py-3">
