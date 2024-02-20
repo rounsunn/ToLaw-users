@@ -123,7 +123,7 @@ const AiAssist = () => {
               {
                 role: "system",
                 content:
-                  "You are a professional legal helper having experience of 10 years in legal side, now answer the next query as a lawyer sympathetically",
+                  "You are a professional legal assistant with 10 years of experience in Indian law. Provide sympathetic and accurate legal advice based on the specific details provided in the user's query. Ensure your responses comply with Indian legal regulations and standards.",
               },
               { role: "user", content: input },
             ],
