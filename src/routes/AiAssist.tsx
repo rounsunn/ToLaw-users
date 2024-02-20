@@ -1,34 +1,17 @@
 import "regenerator-runtime/runtime";
-import useClipboard from "react-use-clipboard";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { useEffect, useState, useRef } from "react";
-import OpenAI from "openai";
-import Speech from "react-speech";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 
 import { PiMicrophoneLight } from "react-icons/pi";
-import { FaMicrophone, FaArrowCircleDown } from "react-icons/fa";
+import { FaMicrophone } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { FaUndo } from "react-icons/fa";
 import { MdRecordVoiceOver, MdOutlineVoiceOverOff } from "react-icons/md";
 
-const voiceProps = {
-  rate: 1, // Default rate
-  pitch: 1, // Default pitch
-  voice: {
-    name: "Google UK English Female", // Voice name (example)
-    lang: "en-IN", // Language (example)
-  },
-};
-
 const OpenAI_API_KEY = import.meta.env.VITE_OpenAI_API_KEY;
-
-const openAi = new OpenAI({
-  apiKey: OpenAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
 
 interface ChatElement {
   type: string;
@@ -59,10 +42,6 @@ const AiAssist = () => {
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-
-  const [isCopied, setCopied] = useClipboard(transcript, {
-    successDuration: 1000,
-  });
 
   useEffect(() => {
     if (listen) {
@@ -109,7 +88,7 @@ const AiAssist = () => {
       ]);
       aiResponse(speechInput);
     }
-    
+
     resetTranscript();
     setListen(false);
   };
