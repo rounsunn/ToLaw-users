@@ -6,6 +6,8 @@ import Search from "./routes/Search";
 import BookNow from "./components/BookNow";
 import "./App.css";
 import AiAssist from "./routes/AiAssist";
+import Template from "./routes/Template";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -23,8 +25,9 @@ function App() {
           </Route>
         </Route>
         <Route path="aiassist" element={<AiAssist />} />
-        <Route path="templates" />
+        <Route path="templates" element={<Template />}/>
       </Routes>
+      <Footer />
     </Router>
   );
 }
