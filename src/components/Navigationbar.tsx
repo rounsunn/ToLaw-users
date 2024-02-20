@@ -8,9 +8,13 @@ const Navigationbar = () => {
 
   return (
     <div className="font-poppins pb-24">
-      <Navbar style={{ backgroundColor: "#0C253F" }} fixed="top">
+      <Navbar
+        style={{ backgroundColor: "#0C253F" }}
+        className="py-0"
+        fixed="top"
+      >
         <Container>
-          <Navbar.Brand className="my-0 mr-md-auto font-weight-normal">
+          <Navbar.Brand className="my-0 mr-md-auto py-0 font-weight-normal">
             <Link to={"/"} className="text-decoration-none">
               <img
                 alt="logo"

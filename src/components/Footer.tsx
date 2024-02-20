@@ -5,7 +5,7 @@ import { RiInstagramFill } from "react-icons/ri";
 
 const Footer = () => {
   return (
-    <div className="font-poppins p-8 mt-4 bg-[#0C253F] text-white flex w-full justify-evenly">
+    <div className="font-poppins p-2 mt-4 bg-[#0C253F] text-white flex w-full justify-evenly">
       <div className="flex flex-col gap-1 text-[12px]">
         <Link to={"search"} className="hover:underline">
           Search lawyers

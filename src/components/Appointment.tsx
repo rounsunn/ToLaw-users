@@ -14,7 +14,7 @@ const Appointment = () => {
       </div>
       <div className="grid grid-cols-4 max-lg:grid-cols-2 gap-3">
         <div
-          className="w-full h-full rounded-2xl p-3"
+          className="w-full h-full rounded-2xl p-3 step-container"
           style={{ backgroundImage: `url(${appointment1})` }}
         >
           <h3 className="text-slate-50 text-2xl max-sm:text-xs font-semibold mb-2">
@@ -25,7 +25,7 @@ const Appointment = () => {
           </p>
         </div>
         <div
-          className="w-full h-full rounded-2xl p-3"
+          className="w-full h-full rounded-2xl p-3 step-container"
           style={{ backgroundImage: `url(${appointment2})` }}
         >
           <h3 className="text-slate-50 text-2xl max-sm:text-xs font-semibold mb-2">
@@ -36,7 +36,7 @@ const Appointment = () => {
           </p>
         </div>
         <div
-          className="w-full h-full rounded-2xl p-3"
+          className="w-full h-full rounded-2xl p-3 step-container"
           style={{ backgroundImage: `url(${appointment3})` }}
         >
           <h3 className="text-slate-50 text-2xl max-sm:text-xs font-semibold mb-2">
@@ -47,7 +47,7 @@ const Appointment = () => {
           </p>
         </div>
         <div
-          className="w-full h-full rounded-2xl p-3"
+          className="w-full h-full rounded-2xl p-3 step-container"
           style={{ backgroundImage: `url(${appointment4})` }}
         >
           <h3 className="text-slate-50 text-2xl max-sm:text-xs font-semibold mb-2">

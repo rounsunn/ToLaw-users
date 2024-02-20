@@ -3,7 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
-
 body::-webkit-scrollbar {
-    width: 0;
+  width: 0;
+}
+
+.step-container {
+  background-size: cover; /* or background-size: contain; */
+  background-position: center center;
+  background-repeat: no-repeat;
 }
