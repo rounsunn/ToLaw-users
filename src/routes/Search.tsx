@@ -1,5 +1,5 @@
 import LawyersCard from "../components/LawyersCard";
-import SearchPage from "../components/SearchPage";
+// import SearchPage from "../components/SearchPage";
 
 const Search = () => {
   return (
