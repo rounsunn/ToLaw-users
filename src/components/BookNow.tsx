@@ -5,6 +5,7 @@ import { LawyerInterface } from "../interface/lawyerSchema";
 import { defaultLawyer } from "../interface/defaultValues";
 import Datetime from "react-datetime";
 import GooglePayButton from "@google-pay/button-react";
+import { v4 as uuidv4 } from 'uuid';
 import "react-datetime/css/react-datetime.css";
 
 const BookNow = () => {
@@ -15,7 +16,8 @@ const BookNow = () => {
     new Date()
   );
   const currency = "INR";
-  const receiptId = `Appointment with ${lawyerInfo.fullName}`;
+  const myUuid = uuidv4();
+  const receiptId = `${myUuid}`;
 
   async function get(url: string) {
     let response = await client.get(url);

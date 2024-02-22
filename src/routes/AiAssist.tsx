@@ -101,7 +101,7 @@ const AiAssist = () => {
   };
 
   const handleStopListening = () => {
-    SpeechRecognition.stopListening;
+    SpeechRecognition.stopListening();
     if (transcript) {
       setChatLog((prevChatLog) => [
         ...prevChatLog,
