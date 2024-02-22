@@ -5,6 +5,7 @@ import { LawyerInterface } from "../interface/lawyerSchema";
 import { defaultLawyer } from "../interface/defaultValues";
 import Datetime from "react-datetime";
 import GooglePayButton from "@google-pay/button-react";
+import { v4 as uuidv4 } from 'uuid';
 import "react-datetime/css/react-datetime.css";
 
 const BookNow = () => {
@@ -15,7 +16,8 @@ const BookNow = () => {
     new Date()
   );
   const currency = "INR";
-  const receiptId = `Appointment with ${lawyerInfo.fullName}`;
+  const myUuid = uuidv4();
+  const receiptId = `${myUuid}`;
 
   async function get(url: string) {
     let response = await client.get(url);
@@ -141,28 +143,33 @@ const BookNow = () => {
   };
 
   return (
-    <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-      <h1>Book Now</h1>
-      <div className="d-flex flex-column align-items-center justify-content-center border rounded-2 border-dark p-4">
-        <div className="d-flex w-100 align-items-center justify-content-center gap-5">
-          <img
-            src={lawyerInfo?.profilePic}
-            alt="profilePic"
-            className="img-fluid"
-            style={{ width: "10rem", height: "10rem" }}
-          />
-          <div className="d-flex align-items-center flex-column p-4">
-            <h2>{lawyerInfo?.fullName}</h2>
-            <p>Mobile no:- {lawyerInfo?.mobileNumber}9384730238</p>
+    <div className="px-28 max-md:px-5 my-10 font-poppins">
+      <h1 className="text-5xl font-semibold capitalize mb-4 flex justify-center w-full">Book Now</h1>
+      <div className="d-flex flex-column align-items-center justify-content-center border rounded-2 border-dark p-20">
+        {/* lawyer details */}
+        <div className='flex justify-between max-md:flex-col-reverse max-md:gap-10 items-start w-full'>
+          <div className='flex flex-column items-start gap-2'>
+            <h1 className="text-4xl font-semibold capitalize">{lawyerInfo?.fullName}</h1>
+            
+            <h2 className='text-xl max-md:text-sm italic'>Bar Council Number - {lawyerInfo?.barCouncilNumber}</h2>
+            <p>Mobile no:- {lawyerInfo?.mobileNumber}</p>
             <p>Experience:- {lawyerInfo?.experience} years</p>
+            
           </div>
-        </div>
-        <div className="d-flex flex-column align-items-center justify-content-center p-4">
-          <h3>Consultation Details</h3>
-          <div className="d-flex gap-3 align-items-center justify-content-center p-2">
-            <p>Charges: ₹{lawyerInfo?.charges}</p>
-            <p>Duration: {lawyerInfo?.consultingDuration}mins</p>
+          <div className="max-md:flex max-md:justify-center rounded-xl">
+            <img src={lawyerInfo?.profilePic} alt={lawyerInfo?.fullName} className="rounded-lg max-md:w-full max-md:h-full w-40 h-40 object-contain"/>  
           </div>
+        </div> 
+
+        <div className="d-flex flex-column align-items-center justify-content-center w-full">
+            <div className='flex flex-col my-5 w-full'>
+                <h2 className='text-xl font-semibold mb-2'>Consultation Services</h2>
+                <div className='flex max-md:flex-col justify-between mb-2 gap-1'>
+                    <div className="text-lg">Duration - {lawyerInfo?.consultingDuration} minutes</div>
+                    <div className="text-lg">Charges - ₹{lawyerInfo?.charges}/hr</div>
+                </div>
+            </div>
+          
           <div className="py-4 d-flex flex-column w-100 gap-2">
             <label htmlFor="userEmail">Enter Your Email:</label>
             <input
@@ -174,7 +181,7 @@ const BookNow = () => {
               placeholder="example@email.com"
             />
           </div>
-          <div className="w-100">
+          <div className="w-100 mb-4">
             <p>Please select a Date and Time of your choosing</p>
             <Datetime
               value={selectedDateTime}
@@ -185,7 +192,7 @@ const BookNow = () => {
         <div>
           <button
             onClick={handlebuttonSubmit}
-            className="btn btn-primary"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
             disabled={isAppointmentButtonDisabled()}
           >
             Schedule Appointment
