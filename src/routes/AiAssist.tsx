@@ -1,11 +1,9 @@
 import "regenerator-runtime/runtime";
-import useClipboard from "react-use-clipboard";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import OpenAI from "openai";
-import Speech from "react-speech";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 
 import { PiMicrophoneLight } from "react-icons/pi";
@@ -13,15 +11,6 @@ import { FaMicrophone, FaArrowCircleDown } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { FaUndo } from "react-icons/fa";
 import { MdRecordVoiceOver, MdOutlineVoiceOverOff } from "react-icons/md";
-
-const voiceProps = {
-  rate: 1, // Default rate
-  pitch: 1, // Default pitch
-  voice: {
-    name: "Google UK English Female", // Voice name (example)
-    lang: "en-IN", // Language (example)
-  },
-};
 
 const OpenAI_API_KEY = import.meta.env.VITE_OpenAI_API_KEY;
 
@@ -41,28 +30,12 @@ const AiAssist = () => {
   const [userInput, setUserInput] = useState("");
   const [speechInput, setSpeechInput] = useState("");
   const [speaking, setSpeaking] = useState(false);
-
-  const [downButtonPressed, setDownButtonPressed] = useState(false);
-  const chatLogRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    if (chatLogRef.current) {
-      chatLogRef.current.scrollTo({
-        top: chatLogRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-    setDownButtonPressed(true);
-  };
+  const [showDiv, setShowDiv] = useState(false);
 
   const startListening = () =>
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-
-  const [isCopied, setCopied] = useClipboard(transcript, {
-    successDuration: 1000,
-  });
 
   useEffect(() => {
     if (listen) {
@@ -114,18 +87,42 @@ const AiAssist = () => {
     setListen(false);
   };
 
-  // const aiResponse = async (input: string) => {
-  //   setUserInput('');
-  //   const completion = await openAi.chat.completions.create({
-  //     messages: [{ role: "user", content: input }],
-  //     model: "gpt-3.5-turbo",
-  //   });
-  //   const botMessage = completion.choices[0].message.content || '';
-  //   setResponse(completion.choices[0].message.content as string);
-  //   setChatLog((prevChatLog) => [...prevChatLog, {type: 'bot', message: botMessage}]);
-  // resetTranscript();
-  // setDownButtonPressed(false);
-  // };.
+  const newFunction = async (text: string) => {
+    try {
+      const mp3 = await openAi.audio.speech.create({
+        model: 'tts-1',
+        voice: 'alloy',
+        input: text,
+      });
+
+      const blob = new Blob([await mp3.arrayBuffer()]);
+      const blobUrl = URL.createObjectURL(blob);
+  
+      return blobUrl;
+    } catch (error) {
+      console.error('Error generating audio:', error);
+    }
+  };
+
+
+  const handleSpeechButton = async (botMessage: string) => {
+    try {
+      const audioUrl = await newFunction(botMessage);
+      const audio = new Audio(audioUrl);
+
+      audio.onloadedmetadata = () => {
+        audio.play();
+        setSpeaking(false); // Set speaking to false when audio starts playing
+      };
+      audio.onended = () => {
+        setSpeaking(false); // Set speaking to false when audio finishes playing
+      };
+    } catch (error) {
+      console.error('Error handling speech button:', error);
+    } finally {
+      setSpeaking(false);
+    }
+  };
 
   const aiResponse = async (input: string) => {
     try {
@@ -201,50 +198,13 @@ const AiAssist = () => {
     } finally {
       resetTranscript();
       setUserInput("");
-      setDownButtonPressed(false);
     }
   };
 
-  const handleTextToSpeech = (botMessage: string) => {
-    let voices = window.speechSynthesis.getVoices();
-
-    const speakMessage = () => {
-      const isHindi = /[।॥ःअ-ऋए-ऑओ-नप-रलळव-ह]/.test(botMessage);
-      let desiredVoice = voices.find((voice) =>
-        isHindi
-          ? voice.name === "Google हिन्दी"
-          : voice.name === "Microsoft Heera - English (India)"
-      );
-
-      if (!desiredVoice) {
-        desiredVoice = voices.find((voice) => voice.default);
-      }
-
-      if (desiredVoice) {
-        const utterance = new SpeechSynthesisUtterance(botMessage);
-        utterance.voice = desiredVoice;
-
-        setSpeaking(true);
-        utterance.onend = () => setSpeaking(false);
-
-        window.speechSynthesis.speak(utterance);
-      } else {
-        console.error("Desired voice not found.");
-      }
-    };
-
-    if (voices.length > 0) {
-      speakMessage();
-    } else {
-      window.speechSynthesis.onvoiceschanged = () => {
-        voices = window.speechSynthesis.getVoices();
-        speakMessage();
-      };
-    }
-  };
 
   // Function to stop speech synthesis
   const stopSpeaking = () => {
+    // audio.pause();
     window.speechSynthesis.cancel();
     setSpeaking(false);
   };
@@ -258,7 +218,7 @@ const AiAssist = () => {
       <div className="px-28 max-md:px-5">
         <div className="flex flex-col items-end justify-center bg-slate-200 rounded-3xl p-4">
           {/* chatbox */}
-          <div className="w-full overflow-auto p-4 mb-4" ref={chatLogRef}>
+          <div className="w-full overflow-auto p-4 mb-4">
             {/* chat log */}
             {chatLog.length > 0 ? (
               <div className="flex flex-col space-y-4 w-full">
@@ -278,21 +238,32 @@ const AiAssist = () => {
                           : "bg-[#0C253F] text-white flex items-center gap-2"
                       } rounded-lg p-4 max-w-[80%]`}
                     >
-                      {messageElement.type === "bot" && !speaking && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleTextToSpeech(messageElement.message)
-                          }
-                        >
-                          <MdRecordVoiceOver className="w-5 h-5" />
-                        </button>
+                      {messageElement.type === "bot" && (
+                        <div className="flex items-center gap-2">
+                          {speaking ? (
+                            <button type="button" onClick={stopSpeaking}>
+                              <MdOutlineVoiceOverOff className="w-5 h-5" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="relative"
+                              onMouseEnter={() => setShowDiv(true)}
+                              onMouseLeave={() => setShowDiv(false)}
+                              onClick={() => handleSpeechButton(messageElement.message)}
+                            >
+                              <div className={`absolute top-[-100px] left-[-60px] bg-white w-[150px] rounded-lg p-2 shadow-md ${showDiv ? 'block' : 'hidden'}`}>
+                                <p className="text-black">
+                                  Click on the icon and wait for the audio to load.
+                                </p>
+                              </div>
+                              <MdRecordVoiceOver className="w-5 h-5" />
+                            </button>
+
+                          )}
+                        </div>
                       )}
-                      {messageElement.type === "bot" && speaking && (
-                        <button type="button" onClick={stopSpeaking}>
-                          <MdOutlineVoiceOverOff className="w-5 h-5" />
-                        </button>
-                      )}
+
                       {messageElement.message}
                     </div>
                   </div>
@@ -320,9 +291,7 @@ const AiAssist = () => {
                   you.
                 </p>
                 <p className="text-normal max-md:text-sm">
-                  You can also listen to my responses in either{" "}
-                  <span className="font-bold">English or Hindi</span>. If you
-                  prefer to hear the answers, look for the voice icon next to my
+                  If you prefer to hear the answers, look for the voice icon next to my
                   responses and click it.
                 </p>
               </div>
