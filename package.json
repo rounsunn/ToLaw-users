@@ -38,6 +38,7 @@
     "react-speech-recognition": "^3.10.0",
     "react-use-clipboard": "^1.0.9",
     "regenerator-runtime": "^0.14.0",
+    "uuid": "^9.0.1",
     "web-vitals": "^3.5.0"
   },
   "devDependencies": {
@@ -48,6 +49,7 @@
     "@types/react-responsive": "^8.0.8",
     "@types/react-speech-recognition": "^3.9.2",
     "@types/react-time-picker": "^6.0.0",
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
